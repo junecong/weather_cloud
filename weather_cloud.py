@@ -19,7 +19,7 @@ url = "http://www.google.com"
 # Orange - hue:45 saturation:1.0 brightness:1
 # Red - hue:0 saturation:1.0 brightness:1
 
-token = "c7aeb493236f5c7938012b106609337b890480da42325bc6bf828c3f8cb89799"
+token = ""
 
 headers = {
     "Authorization": "Bearer %s" % token,
