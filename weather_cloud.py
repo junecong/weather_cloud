@@ -18,8 +18,7 @@ headers = {
     "Authorization": "Bearer %s" % token,
 }
 
-def get_weather_for_the_day(url):
-	"""Return what the weather will be like for the day"""
+def get_weather_for_the_day():
 	f = urllib2.urlopen('http://api.wunderground.com/api/7d7772c918e39295/conditions/q/CA/San_Francisco.json')
 	json_string = f.read()
 	parsed_json = json.loads(json_string)
@@ -33,7 +32,6 @@ def get_weather_for_the_day(url):
 	print "Will it rain? %s" % (rainfall)
 	f.close()
 	return degree
-
 
 def color_based_on_weather(degree):
     if degree >= 80:
@@ -53,11 +51,9 @@ def color_based_on_weather(degree):
         color = 'purple'
     return color
 
-
-#main function that runs in the morning
 def on():
 	print("Let there be light")
-	degree = get_weather_for_the_day(url)
+	degree = get_weather_for_the_day()
 	color = color_based_on_weather(degree)
 
 	#Lastly, you want to set the color and pass it to the bulb
@@ -67,8 +63,14 @@ def on():
 	    "brightness": 1.0,
 	    "duration": 10,
 	}
-
 	response = requests.put('https://api.lifx.com/v1/lights/all/state', data=payload, headers=headers)
+	
+	# if rain == True:
+	# 	data = {
+	#     "period": 2,
+	#     "color": "pink",
+	# 	}
+	# 	response = requests.post('https://api.lifx.com/v1/lights/all/effects/breathe', data=data, headers=headers)
 
 def off():
 	payload = {
