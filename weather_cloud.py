@@ -5,60 +5,62 @@ import schedule #import schedule to schedule lights everyday at 7am-9am
 import time
 import requests #import for lifx lightbulb settings
 import json
+import urllib2 #import for weather json parsing
 
-#defining variables
 color = "white" #color I want the bulb to change to
-degree = 0
-rain = False
-url = "http://www.google.com"
+degree = 0 #what the weather feels like at the moment, not actual temperature
+rain = False #will it rain today?
+rainfall = 0
 
-# Colors
-# Purple - hue:295 saturation:1.0 brightness:1 kelvin:3500
-# Blue - hue:240 saturation:1.0 brightness:1
-# Warm white - kelvin:2700 brightness: 1
-# Orange - hue:45 saturation:1.0 brightness:1
-# Red - hue:0 saturation:1.0 brightness:1
 
-token = ""
 
 headers = {
     "Authorization": "Bearer %s" % token,
 }
 
-
-
-
-
-
-
-
 def get_weather_for_the_day(url):
 	"""Return what the weather will be like for the day"""
-	pass
+	f = urllib2.urlopen('http://api.wunderground.com/api/7d7772c918e39295/conditions/q/CA/San_Francisco.json')
+	json_string = f.read()
+	parsed_json = json.loads(json_string)
+	degree = parsed_json['current_observation']['feelslike_f']
+	degree = float(degree)
+	rainfall = parsed_json['current_observation']['precip_today_string']
+	rainfall = float(rainfall[0:4])
+	if rainfall > 0:
+		rain = True
+	print "Current temperature is: %s" % (degree)
+	print "Will it rain? %s" % (rainfall)
+	f.close()
+	return degree
+
 
 def color_based_on_weather(degree):
     if degree >= 80:
+    	print "Red and %s" % (degree)
         color = 'red'
     elif degree >= 70:
+    	print "orange and %s" % (degree)
         color = 'orange'
     elif degree >= 63:
+    	print "white and %s" % (degree)
         color = 'white'
     elif degree >= 55:
+    	print "blue and %s" % (degree)
         color = 'blue'
     else:
+    	print "purple and %s" % (degree)
         color = 'purple'
     return color
-
-
 
 
 #main function that runs in the morning
 def on():
 	print("Let there be light")
-    # degree = get_weather_for_the_day(url)
+	degree = get_weather_for_the_day(url)
 	color = color_based_on_weather(degree)
 
-    #Lastly, you want to set the color and pass it to the bulb
+	#Lastly, you want to set the color and pass it to the bulb
 	payload = {
 	    "power": "on",
 	    "color": color,
@@ -73,16 +75,17 @@ def off():
 	    "power": "off",
 	}
 
-#Set the bulb to do this every day at 7:00am
-schedule.every().day.at("7:00").do(on)
-#Set the bulb to turn off every day at 9:00am
-schedule.every().day.at("9:00").do(off)
+# #Set the bulb to do this every day at 7:00am
+# schedule.every().day.at("0:25").do(on)
+# #Set the bulb to turn off every day at 9:00am
+# schedule.every().day.at("9:00").do(off)
+
+
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
 
 
 while True:
-    schedule.run_pending()
-    time.sleep(1)
-
-
-
+    on()
 
