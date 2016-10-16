@@ -9,6 +9,8 @@ import requests
 #import for weather json parsing
 import json
 import urllib2 
+#import to print time
+import time
 
 token = "YOUR TOKEN HERE" 
 headers = {
@@ -19,7 +21,7 @@ rain = False
 degree = 0
 
 def get_weather_for_the_day():
-	f = urllib2.urlopen('URL FOR WEATHER CALL HERE')
+	f = urllib2.urlopen('WEATHER URL HERE')
 	json_string = f.read()
 	parsed_json = json.loads(json_string)
 	degree = parsed_json['currently']['apparentTemperature']
@@ -28,40 +30,29 @@ def get_weather_for_the_day():
 	rainfall = float(rainfall)
 	if rainfall > 0:
 		rain = True
-	print "Current temperature is: %s" % (degree)
-	print "Will it rain? %s" % (rain)
 	f.close()
-	return degree
+	return degree, rain
 
 def color_based_on_weather(degree, rain):
-	if rain:
-		print "Pink and %s" % (degree)
-		color = 'pink'
-	else:
-	    if degree >= 80:
-	    	print "Red and %s" % (degree)
-	        color = 'red'
-	    elif degree >= 70:
-	    	print "orange and %s" % (degree)
-	        color = 'orange'
-	    elif degree >= 63:
-	    	print "white and %s" % (degree)
-	        color = 'white'
-	    elif degree >= 55:
-	    	print "blue and %s" % (degree)
-	        color = 'blue'
-	    else:
-	    	print "purple and %s" % (degree)
-	        color = 'purple'
-	    return color
-	return color
+    if degree >= 80:
+        color = 'red'
+    elif degree >= 70:
+        color = 'orange'
+    elif degree >= 60:
+        color = 'white'
+    elif degree >= 53:
+        color = 'blue'
+    else:
+        color = 'purple'
+    print(degree)
+    print(color)
+    return color
 
 def on():
-	print("Let there be light")
-	degree = get_weather_for_the_day()
+	print "Turning on - " + time.strftime("%Y-%m-%d %H:%M")
+	degree, rain = get_weather_for_the_day()
 	color = color_based_on_weather(degree, rain)
 
-	#Lastly, you want to set the color and pass it to the bulb
 	payload = {
 	    "power": "on",
 	    "color": color,
@@ -69,23 +60,28 @@ def on():
 	    "duration": 10,
 	}
 	response = requests.put('https://api.lifx.com/v1/lights/all/state', data=payload, headers=headers)
+
+	if(rain):
+		print "Raining today"
+		for x in range(0, 94):
+			data = {
+			    "period": 4,
+			    "cycles": 15,
+			    "color": "hue:300 saturation:1.0 brightness:0.3",
+			}
+			response = requests.post('https://api.lifx.com/v1/lights/all/effects/breathe', data=data, headers=headers)
+			time.sleep(60)
 	
 def off():
-	payload = {
-	    "power": "off",
-	}
+	print "Turning off - " + time.strftime("%Y-%m-%d %H:%M")
+	print "\n"
+	response = requests.post('https://api.lifx.com/v1/lights/all/toggle', headers=headers)
 
-
-#Set the bulb to do this every day at 7:00am
-schedule.every().day.at("13:20").do(on)
-#Set the bulb to turn off every day at 9:00am
-schedule.every().day.at("13:22").do(off)
+schedule.every().day.at("6:50").do(on)
+schedule.every().day.at("8:25").do(off)
 
 while True:
     schedule.run_pending()
     time.sleep(1)
 
-# Test module
-# while True:
-# on()
 
