@@ -12,7 +12,8 @@ import urllib2
 #import to print time
 import time
 
-token = "YOUR TOKEN HERE" 
+#lifex token
+token = "x" 
 headers = {
     "Authorization": "Bearer %s" % token,
 }
@@ -21,7 +22,7 @@ rain = False
 degree = 0
 
 def get_weather_for_the_day():
-	f = urllib2.urlopen('WEATHER URL HERE')
+	f = urllib2.urlopen('https://api.darksky.net/forecast/x/37.774327,-122.434022')
 	json_string = f.read()
 	parsed_json = json.loads(json_string)
 	degree = parsed_json['currently']['apparentTemperature']
